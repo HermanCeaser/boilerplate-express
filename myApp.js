@@ -1,6 +1,9 @@
 var express = require("express");
-var app = express();
+
 const path = require("path");
+const bodyParser = require('body-parser');
+
+var app = express();
 
 // --> 7)  Mount the Logger middleware here
 
@@ -14,6 +17,10 @@ console.log("Hello World");
 app.get('/', (req,res)=>{
   res.send('Hello Express');
 })*/
+
+// BodyParser Middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 /** 7) Root-level Middleware - A logger */
 //  place it before all the routes !
@@ -34,28 +41,44 @@ app.use(express.static(path.join(__dirname, 'public')));
 /** 5) serve JSON on a specific route */
 app.get("/json", (req, res) => {
   let message = "Hello json";
-  if(process.env.MESSAGE_STYLE === "uppercase"){
+  if (process.env.MESSAGE_STYLE === "uppercase") {
     message = message.toUpperCase();
   }
-  res.json({message});
+  res.json({ message });
 })
 
 /** 6) Use the .env file to configure the app */
 
 
 /** 8) Chaining middleware. A Time server */
-app.get("/now", (req, res, next)=>{
+app.get("/now", (req, res, next) => {
   req.time = new Date().toString();
   next();
 }, (req, res) => {
-  res.json({ time: req.time});
+  res.json({ time: req.time });
 })
 
 /** 9)  Get input from client - Route parameters */
+app.get("/:word/echo", (req, res) => {
+  res.json({ echo: req.params.word });
+})
 
 /** 10) Get input from client - Query parameters */
 // /name?first=<firstname>&last=<lastname>
 
+app.get("/name", (req, res) => {
+  let { first, last } = req.query;
+  res.json({
+    name: `${first} ${last}`
+  })
+});
+
+app.post("/name", (req, res) => {
+  let { first, last } = req.body;
+  res.json({
+    name: `${first} ${last}`
+  })
+})
 /** 11) Get ready for POST Requests - the `body-parser` */
 // place it before all the routes !
 
